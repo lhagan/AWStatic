@@ -99,7 +99,12 @@ class Parser(object):
         length = int(length)
         lines = []
         while length > 0:
-            lines.append(fp.readline().strip())
+            read_line = fp.readline().strip()
+            # convert to utf-8
+            read_line = read_line.decode('latin-1').encode('utf-8')
+            # try to filter out malformed lines
+            if not read_line.startswith('END_') and read_line != "":
+                lines.append(read_line)
             length -= 1
         fp.readline()  # eat ending line ('END_<section_name>')
         data_keys = SECTIONS.get(name, None)
@@ -113,14 +118,19 @@ class Parser(object):
                 data[key] = values[1:]
             else:
                 for i, data_key in enumerate(data_keys):
-                    data[key][data_key] = values[i]
+                    # check to make sure i exists
+                    if len(values) > i:
+                        data[key][data_key] = values[i]
         return name, data
 
     def parse_file(self, path, yyyymm):
         """Parse a single file that corresponds to the given date
         (formatted as YYYYMM).
         """
-        with codecs.open(path, 'r', 'utf-8') as fp:
+        # codecs.open throwing an unrecognized character error
+        # awstats output is not utf-8
+        #with codecs.open(path, 'r', 'utf-8') as fp:
+        with open(path, 'r') as fp:
             while 1:
                 line = fp.readline()
                 if not line:  # end of file

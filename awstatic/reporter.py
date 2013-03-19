@@ -126,24 +126,25 @@ def _create_report_overview(data):
                    'visits': 0}
     report = {}
     all_time = empty_stats.copy()
-    for yyyymm, d in data['DAY'].items():
-        yyyy = yyyymm[:4]
-        year = report.get(yyyy, None)
-        if year is None:
-            year = report[yyyy] = empty_stats.copy()
-        month = empty_stats.copy()
-        for day in range(1, 1 + get_number_of_days(yyyymm)):
-            yyyymmdd = '%s%02d' % (yyyymm, day)
-            info = d.get(yyyymmdd, {})
-            day_data = {'visitors': 0}  # not reported by AWStats
-            for key in ('hits', 'pages', 'bandwidth', 'visits'):
-                day_data[key] = int(info.get(key, 0))
-                month[key] += day_data[key]
-                year[key] += day_data[key]
-                all_time[key] += day_data[key]
-            report[yyyymmdd] = day_data
-        month['visitors'] = data['GENERAL'][yyyymm]['TotalUnique'][0]
-        report[yyyymm] = month
+    if 'DAY' in data:
+        for yyyymm, d in data['DAY'].items():
+            yyyy = yyyymm[:4]
+            year = report.get(yyyy, None)
+            if year is None:
+                year = report[yyyy] = empty_stats.copy()
+            month = empty_stats.copy()
+            for day in range(1, 1 + get_number_of_days(yyyymm)):
+                yyyymmdd = '%s%02d' % (yyyymm, day)
+                info = d.get(yyyymmdd, {})
+                day_data = {'visitors': 0}  # not reported by AWStats
+                for key in ('hits', 'pages', 'bandwidth', 'visits'):
+                    day_data[key] = int(info.get(key, 0))
+                    month[key] += day_data[key]
+                    year[key] += day_data[key]
+                    all_time[key] += day_data[key]
+                report[yyyymmdd] = day_data
+            month['visitors'] = data['GENERAL'][yyyymm]['TotalUnique'][0]
+            report[yyyymm] = month
     report['all-time'] = all_time  # FIXME: not used (yet)
     return report
 
@@ -273,25 +274,26 @@ def _create_report_helper(data, section_key, keys, discr, aggregate_keys,
         lambda: defaultdict(empty_aggregate_dict))
     # We are going to iterate over each key of the report, i.e. over
     # each month.
-    for yyyymm, d in data[section_key].items():
-        # Build a dictionary with the keys listed in ``keys`` and
-        # convert values. This is where we convert strings to
-        # integers.
-        items = []
-        for item in d.values():
-            converted_item = {}
-            for key, converter in keys.items():
-                value = item[key]
-                if converter is not None:
-                    value = converter(value)
-                converted_item[key] = value
-            items.append(converted_item)
-        report[yyyymm] = items
-        # Aggregate data for this year.
-        yyyy = yyyymm[:4]
-        for item in items:
-            for key in aggregate_keys:
-                years[yyyy][item[discr]][key] += item[key]
+    if section_key in data:
+        for yyyymm, d in data[section_key].items():
+            # Build a dictionary with the keys listed in ``keys`` and
+            # convert values. This is where we convert strings to
+            # integers.
+            items = []
+            for item in d.values():
+                converted_item = {}
+                for key, converter in keys.items():
+                    value = item[key]
+                    if converter is not None:
+                        value = converter(value)
+                    converted_item[key] = value
+                items.append(converted_item)
+            report[yyyymm] = items
+            # Aggregate data for this year.
+            yyyy = yyyymm[:4]
+            for item in items:
+                for key in aggregate_keys:
+                    years[yyyy][item[discr]][key] += item[key]
     # Sort data for each month.
     for month, items in report.items():
         items = sorted(items, key=lambda i: i[sort_on], reverse=True)
