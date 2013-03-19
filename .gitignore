@@ -24,3 +24,13 @@ nosetests.xml
 
 #Mr Developer
 .mr.developer.cfg
+
+# AWStats
+awstats
+logs
+stats
+update.sh
+
+# Local
+awstatic.ini
+out
