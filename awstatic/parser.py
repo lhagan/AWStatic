@@ -21,6 +21,7 @@ SECTIONS = {
     'SEREFERRALS': ('id', 'pages', 'hits'),
     'SIDER': ('url', 'pages', 'bandwidth', 'entry', 'exit'),
     'VISITOR': ('host', 'pages', 'hits', 'bandwidth'),
+    'PLUGIN_geoip_city_maxmind': ('id', 'pages', 'hits', 'bandwidth', 'last_access')
     }
 
 

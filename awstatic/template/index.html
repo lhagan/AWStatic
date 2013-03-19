@@ -45,7 +45,11 @@
       <li id="nav-phrases">
         <a href="javascript: void(0)" onclick="ui.show_page('phrases')">Search phrases</a></li>
       <li id="nav-browsers">
-        <a href="javascript: void(0)" onclick="ui.show_page('browsers')">Browsers/OS</a></li>
+        <a href="javascript: void(0)" onclick="ui.show_page('browsers')">Browsers</a></li>
+      <li id="nav-OSs">
+        <a href="javascript: void(0)" onclick="ui.show_page('OSs')">OSs</a></li>
+	    <li id="nav-cities">
+	      <a href="javascript: void(0)" onclick="ui.show_page('cities')">Cities</a></li>
     </ul>
     <div class="last-update">
       Last update: ${last_update}
@@ -131,7 +135,40 @@
       </table>
     </div>
     <div id="page-browsers" class="hidden">
-      Browsers/OS: not available yet.
+      <table class="browsers listing">
+        <thead>
+          <tr>
+            <th>Browser</th>
+            <th>Hits</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="page-OSs" class="hidden">
+      <table class="OSs listing">
+        <thead>
+          <tr>
+            <th>OS</th>
+            <th>Hits</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="page-cities" class="hidden">
+      <table class="cities listing">
+        <thead>
+          <tr>
+            <th>Country</th>
+						<th>Region</th>
+						<th>City</th>
+						<th>Pages</th>
+            <th>Hits</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
 
@@ -201,6 +238,33 @@
     <tr>
       <td>{{this.phrase}}</td>
       <td>{{this.searches}}</td>
+    </tr>
+    {{/each}}
+  </script>
+  <script id="tmpl-browsers-table" type="text/html">
+    {{#each browsers}}
+    <tr>
+      <td>{{this.id}}</td>
+      <td>{{this.hits}}</td>
+    </tr>
+    {{/each}}
+  </script>
+  <script id="tmpl-OSs-table" type="text/html">
+    {{#each OSs}}
+    <tr>
+      <td>{{this.id}}</td>
+      <td>{{this.hits}}</td>
+    </tr>
+    {{/each}}
+  </script>
+  <script id="tmpl-cities-table" type="text/html">
+    {{#each cities}}
+    <tr>
+      <td>{{this.country}}</td>
+			<td>{{this.region}}</td>
+			<td>{{this.city}}</td>
+			<td>{{this.pages}}</td>
+      <td>{{this.hits}}</td>
     </tr>
     {{/each}}
   </script>

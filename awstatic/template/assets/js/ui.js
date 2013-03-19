@@ -249,6 +249,9 @@ UI.prototype.update_reports = function() {
     this.update_report_referrers();
     this.update_report_keywords();
     this.update_report_phrases();
+    this.update_report_browsers();
+    this.update_report_OSs();
+    this.update_report_cities();
 };
 
 // FIXME: review this. Probably rename.
@@ -386,6 +389,26 @@ UI.prototype.update_report_phrases = function() {
     $('.phrases').children('tbody').html(this.render('phrases-table', view));
 };
 
+// Update "Browsers" report.
+UI.prototype.update_report_browsers = function() {
+    var browsers = this.data['browsers'][this.period] || [];
+    var view = {'browsers': browsers};
+    $('.browsers').children('tbody').html(this.render('browsers-table', view));
+};
+
+// Update "OSs" report.
+UI.prototype.update_report_OSs = function() {
+    var OSs = this.data['OSs'][this.period] || [];
+    var view = {'OSs': OSs};
+    $('.OSs').children('tbody').html(this.render('OSs-table', view));
+};
+
+// Update "Cities" report.
+UI.prototype.update_report_cities = function() {
+    var cities = this.data['cities'][this.period] || [];
+    var view = {'cities': cities};
+    $('.cities').children('tbody').html(this.render('cities-table', view));
+};
 
 var ui = undefined; // will be set in 'init_ui()'
 

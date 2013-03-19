@@ -113,6 +113,9 @@ def create_report(data, url):
     report['referrers'] = _create_report_referrers(data)
     report['keywords'] = _create_report_keywords(data)
     report['phrases'] = _create_report_phrases(data)
+    report['browsers'] = _create_report_browsers(data)
+    report['OSs'] = _create_report_OSs(data)
+    report['cities'] = _create_report_cities(data)
     # FIXME: for each report, calculate all-time total
     report['periods'] = get_periods(report['overview'].keys())
     return report
@@ -224,6 +227,86 @@ def _create_report_phrases(data):
     return _create_report_helper(
         data, 'SEARCHWORDS', keys, discr, aggregate_keys, 'searches', top=30)
 
+def _create_report_browsers(data):
+    section_key = 'BROWSER'
+    keys = {'id': None, 'hits': int}
+    discr = 'id'
+    aggregate_keys = ('hits', )
+    
+    category_map = { 'safari': {'id': 'Safari', 'hits': 0},
+                    'firefox': {'id': 'Firefox', 'hits': 0},
+                    'chrome': {'id': 'Chrome', 'hits': 0},
+                    'msie': {'id': 'IE', 'hits': 0},
+                    'opera': {'id': 'Opera', 'hits': 0},  
+                    'other': {'id': 'Other', 'hits': 0}}
+    data = _post_process_data(data, section_key, category_map)
+    
+    return _create_report_helper(
+        data, 'BROWSER', keys, discr, aggregate_keys, 'hits', top=30)
+
+def _create_report_OSs(data):
+    section_key = 'OS'
+    keys = {'id': None, 'hits': int}
+    discr = 'id'
+    aggregate_keys = ('hits', )
+    
+    category_map = { 'mac': {'id': 'OS X', 'hits': 0},
+                    'win': {'id': 'Windows', 'hits': 0},
+                    'linux': {'id': 'Linux', 'hits': 0}, 
+                    'other': {'id': 'Other', 'hits': 0}}
+    data = _post_process_data(data, section_key, category_map)
+        
+    return _create_report_helper(
+        data, section_key, keys, discr, aggregate_keys, 'hits', top=30)
+
+def _create_report_cities(data):
+    section_key = 'PLUGIN_geoip_city_maxmind'
+    keys = {'id': None, 'city': None, 'region': None, 'country': None, 'pages': int, 'hits': int}
+    discr = 'city'
+    aggregate_keys = ('pages', 'hits')
+    
+    # process id into city, region, country
+    processed_data = {}
+    processed_data[section_key] = {}
+    if section_key in data:
+        for yyyymm, d in data[section_key].items(): 
+            processed_data[section_key][yyyymm] = {}       
+            for item in d.values():
+                name = item['id'].replace('%20', ' ')
+                if name != 'unknown':
+                    country, city, region = name.split('_')
+                    item['country'] = country.upper()
+                    item['city'] = city.title()
+                    item['region'] = region.upper()
+                else:
+                    item['country'] = 'Unknown'
+                    item['city'] = ''
+                    item['region'] = ''
+            
+                processed_data[section_key][yyyymm][item['id']] = item
+    
+    return _create_report_helper(
+        processed_data, section_key, keys, discr, aggregate_keys, 'hits', top=30)
+        
+def _post_process_data(data, section_key, category_map):
+    processed_data = {}
+    processed_data[section_key] = {}
+    if section_key in data:
+        for yyyymm, d in data[section_key].items():
+            local_map = category_map.copy()
+        
+            for item in d.values():
+                matched = False
+                for category in local_map.keys():
+                    hits = int(item['hits'])
+                    if item['id'].startswith(category):
+                        local_map[category]['hits'] += hits
+                        matched = True
+                if not matched:
+                    local_map['other']['hits'] += hits
+                
+            processed_data[section_key][yyyymm] = local_map
+    return processed_data
 
 def _create_report_helper(data, section_key, keys, discr, aggregate_keys,
                           sort_on, top=None):
